@@ -1,0 +1,63 @@
+name: Manual digest preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      clean:
+        description: Replace the reviewed preview with an unset-marker copy (requires separate approval)
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Uses the exact pnpm version pinned in package.json's packageManager field.
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm typecheck
+      - name: Reject a tracked environment file
+        shell: bash
+        run: |
+          if git ls-files --error-unmatch .env >/dev/null 2>&1; then
+            echo 'A tracked .env is not allowed.' >&2
+            exit 1
+          fi
+      - name: Export initial preview
+        if: ${{ !inputs.clean }}
+        env:
+          LANE_MARKER: ${{ secrets.LANE_MARKER }}
+        run: node scripts/export-preview.mjs --output var/preview/index.html
+      - name: Export clean replacement without loading .env
+        if: ${{ inputs.clean }}
+        run: node scripts/export-preview.mjs --clean --output var/preview/index.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: var/preview
+          retention-days: 1
+      - name: Deploy the artifact to the same Pages site
+        id: deployment
+        uses: actions/deploy-pages@v4
