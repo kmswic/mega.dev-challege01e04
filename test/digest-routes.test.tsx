@@ -34,9 +34,9 @@ function jobRows(html: string) {
     .map((match) => ({ job: match[2], html: match[0] }));
 }
 
-function cells(html: string) {
-  return [...html.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/gi)]
-    .map((match) => match[1].replace(/<[^>]*>/g, '').trim());
+function cells(rowHtml: string) {
+  return [...rowHtml.matchAll(/<(td|th)\b[^>]*>([\s\S]*?)<\/\1>/gi)]
+    .map((match) => match[2].replace(/<[^>]*>/g, '').trim());
 }
 
 function hasWarning(html: string) {
@@ -80,14 +80,18 @@ describe('digest routes', () => {
     expect(html.match(/<table\b/gi)).toHaveLength(1);
     const rows = jobRows(html);
     expect(rows.map((row) => row.job)).toEqual(expected.rows.map((row) => row.job));
-    expect(html.match(/<td\b/gi)).toHaveLength(expected.rows.length * 8);
+    expect(rows.flatMap((row) => cells(row.html))).toHaveLength(expected.rows.length * 8);
     for (const [index, row] of expected.rows.entries()) {
       const values = cells(rows[index].html);
       expect(values).toHaveLength(8);
-      expect(values).toEqual(expect.arrayContaining([
+      // Only the deliberate high-retry explanation may accompany the exact number.
+      const fieldValues = values.map((value) =>
+        row.retries >= 3 && value === `${row.retries} (high retries)` ? String(row.retries) : value,
+      );
+      expect(fieldValues.sort()).toEqual([
         row.job, row.owner ?? '—', String(row.runs), String(row.retries),
         row.lastStatus, row.lastError ?? '—', row.firstAt, row.lastAt,
-      ]));
+      ].sort());
       expect(values).not.toContain('');
     }
   });
