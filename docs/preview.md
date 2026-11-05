@@ -43,7 +43,9 @@ After that approval:
    Send the reviewer **the URL and this plan's issue links**, not an attachment.
    Sending that message is also an outside action: obtain approval for its
    recipient and content first. Issue #7 stays open until that approved message
-   has actually been sent. Record URLs/run IDs only, never marker values.
+    has actually been sent and the course confirms the reviewer has looked.
+    Delivery acknowledgement is not review completion. Record URLs/run IDs only,
+    never marker values.
 
 ## Local export (does not deploy)
 
