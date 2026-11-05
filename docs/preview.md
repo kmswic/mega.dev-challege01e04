@@ -24,7 +24,7 @@ After that approval:
    **Settings → Pages → Build and deployment → Source: GitHub Actions**. No
    `gh-pages` branch is needed. The workflow never commits generated HTML.
 2. Set `LANE_MARKER` as an Actions secret through the approved secure channel.
-   Do not add a literal value to the workflow, an input, HTML, base64, or a command
+    Do not hard-code its value in the workflow, an input, HTML, base64, or a command
    in shell history. Do not commit `.env`. The initial export fails without a
    nonempty marker. Use Node 22 and the exact pnpm 10 version pinned by
    `packageManager`; installation uses `pnpm-lock.yaml` with `--frozen-lockfile`.
@@ -61,8 +61,8 @@ force-add it. The exporter uses the current Node executable to start installed
 argument, a temporary port, bounded readiness retries, and a timed HTTP fetch.
 It fetches over loopback, checks HTTP 200 and static HTML, and always terminates
 the server process group, including on failure or interruption. Server output
-and response content are not logged. The current server controls its listening
-interface; run this on a trusted local machine or the isolated Actions runner.
+and response content are not logged. The server explicitly binds to
+`127.0.0.1`; run this on a trusted local machine or the isolated Actions runner.
 
 For a local clean copy:
 
