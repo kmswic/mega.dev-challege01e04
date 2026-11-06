@@ -129,6 +129,6 @@ Issue URLs and titles come from the private course record `s01e04-log/issues.jso
   22.23.4 and existing dependencies. Both supplied `runs/` fixtures were
   verified byte-for-byte unchanged against HEAD. Command evidence is in the
   private course record `s01e04-log/commands.jsonl`.
-- The original plan is archived here with all eight issue links. Issue #8
-  remains open for parent verification and integration; only the parent will
-  perform the final course resubmission.
+- The original plan is archived here with all eight issue links. At the cleanup
+  worker's handoff, issue #8 remained open for parent verification and integration;
+  the parent handles issue closure and final course resubmission separately.
